@@ -47,10 +47,25 @@ class Turing {
       }
 
       void printTapeValues () {
+         bool pleaseClose = false;
          for (TapeIterator iter = tape.begin(); iter != tape.end(); iter++) {
-            cout << " | " << iter->second; 
+            if (pleaseClose) {
+               cout << " ] ";
+               pleaseClose = false;
+            } else if (iter->first == tape_index) {
+               cout << " [ ";
+               pleaseClose = true;
+            }
+            else {
+               cout << " | ";
+            }
+            cout << iter->second; 
          }
-         cout << " |\n";
+         if (pleaseClose) {
+            cout << " ]\n";
+         } else {
+            cout << " |\n";
+         }
       }
 
       Turing  () {}
