@@ -42,7 +42,7 @@ class Turing {
       }
 
       void printTapeValues () {
-         cout << "TAPE CONTENTS: \n";
+         cout << "\n";
          for (TapeIterator iter = tape.begin(); iter != tape.end(); iter++) {
             cout << " | " << iter->second; 
          }
@@ -55,7 +55,6 @@ class Turing {
 
 
 void Turing::parseInstructions (string filename) {
-   cout << "READING: " << filename << endl;
    ifstream infile(filename.c_str());
    string tape_state, current_state, read_value, write_value, next_state, direction;
 
@@ -83,7 +82,6 @@ void Turing::parseInstructions (string filename) {
    {
       write_value = write_value.substr(2, write_value.length() - 5);
       direction = direction.substr(1, direction.length() - 2);
-      cout << current_state << read_value << " | " << write_value << direction << " | " << next_state << "\n";
 
       State instruction;
       instruction.write_value = write_value;
@@ -100,10 +98,13 @@ void Turing::runSimulation () {
       string read_value = tape[tape_index];
       State instruction = instructions[_state + "(" + read_value + ")"];
       if (instruction.next_state == "") {
-         cerr << "STATE(READ_VALUE) NOT FOUND: '" << _state + "(" + read_value + ")" << "'" << endl;
+         cerr << "STATE(READ_VALUE) NOT FOUND: '" 
+              << _state + "(" + read_value + ")" 
+              << "'" << endl;
          break;
       }
-      cout << _state + "(" + read_value + ")" << "::" << instruction.write_value << instruction.direction << instruction.next_state << endl;
+      // cerr << _state + "(" + read_value + ")" << "::" << instruction.write_value << instruction.direction << instruction.next_state << endl;
+      
       tape[tape_index] = instruction.write_value;
       _state = instruction.next_state;
       if (instruction.direction == "left")  goLeft();
