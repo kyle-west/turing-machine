@@ -19,7 +19,7 @@ typedef map<int, string>::const_iterator TapeIterator;
 class Turing {
    private:
       map <string, State> instructions;
-      string current_state;
+      string _state;
       string starting_state;
       string default_value;
       map <int, string> tape;
@@ -41,6 +41,14 @@ class Turing {
          }
       }
 
+      void printTapeValues () {
+         cout << "TAPE CONTENTS: \n";
+         for (TapeIterator iter = tape.begin(); iter != tape.end(); iter++) {
+            cout << " | " << iter->second; 
+         }
+         cout << " |\n";
+      }
+
       Turing  () {}
       ~Turing () {}
 };
@@ -49,9 +57,27 @@ class Turing {
 void Turing::parseInstructions (string filename) {
    cout << "READING: " << filename << endl;
    ifstream infile(filename.c_str());
-   string current_state, read_value, write_value, next_state, direction;
+   string tape_state, current_state, read_value, write_value, next_state, direction;
 
-   infile >> default_value >> starting_state;
+   infile >> tape_state >> default_value >> starting_state;
+
+   tape_index = 0;
+   _state = starting_state;
+   if (tape_state == "||") {
+      tape[tape_index] = default_value;
+   } else {
+      string value = "";
+      for (int i = 1; i < tape_state.length(); i++) {
+         if (tape_state[i] == '|') {
+            tape[tape_index++] = value;
+            value = "";
+         } else {
+            value += tape_state[i];
+         }
+      }
+      tape_index = 0;
+   }
+   
 
    while (infile >> current_state >> read_value >> write_value >> next_state >> direction)
    {
@@ -69,29 +95,22 @@ void Turing::parseInstructions (string filename) {
 }
 
 void Turing::runSimulation () {
-   tape_index = 0;
-   tape[tape_index] = default_value;
-   current_state = starting_state;
-
-   while (current_state != "halt") {
+   while (_state != "halt") {
+      printTapeValues();
       string read_value = tape[tape_index];
-      State instruction = instructions[current_state + "(" + read_value + ")"];
+      State instruction = instructions[_state + "(" + read_value + ")"];
       if (instruction.next_state == "") {
-         cerr << "STATE(READ_VALUE) NOT FOUND: '" << current_state + "(" + read_value + ")" << "'" << endl;
+         cerr << "STATE(READ_VALUE) NOT FOUND: '" << _state + "(" + read_value + ")" << "'" << endl;
          break;
       }
-      cout << current_state + "(" + read_value + ")" << "::" << instruction.write_value << instruction.direction << instruction.next_state << endl;
+      cout << _state + "(" + read_value + ")" << "::" << instruction.write_value << instruction.direction << instruction.next_state << endl;
       tape[tape_index] = instruction.write_value;
-      current_state = instruction.next_state;
+      _state = instruction.next_state;
       if (instruction.direction == "left")  goLeft();
       if (instruction.direction == "right") goRight();
    }
 
-   cout << "TAPE CONTENTS: \n";
-   for (TapeIterator iter = tape.begin(); iter != tape.end(); iter++) {
-      cout << " | " << iter->second; 
-   }
-   cout << " |\n";
+   printTapeValues();
 }
 
 #endif // TURING_H
