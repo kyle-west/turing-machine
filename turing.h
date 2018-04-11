@@ -8,28 +8,33 @@
 #include <utility>
 using namespace std;
 
+// a simple container for our instruction-states
 struct State {
    string write_value;
    string direction;
    string next_state;
 };
 
+// shorthand for the iterator we need to parse the tape
 typedef map<int, string>::const_iterator TapeIterator;
 
 class Turing {
    private:
       map <string, State> instructions;
+
       string _state;
       string starting_state;
       string default_value;
+
       map <int, string> tape;
       int tape_index;
-
 
    
    public:
       void parseInstructions (string filename);
       void runSimulation ();
+
+      // move on the tape
       void goLeft () {
          if (tape.find(--tape_index) == tape.end()) {
             tape[tape_index] = default_value;
@@ -42,7 +47,6 @@ class Turing {
       }
 
       void printTapeValues () {
-         cout << "\n";
          for (TapeIterator iter = tape.begin(); iter != tape.end(); iter++) {
             cout << " | " << iter->second; 
          }
@@ -53,7 +57,9 @@ class Turing {
       ~Turing () {}
 };
 
-
+/*****************************************************************************
+* read the file in and parse it into an instruction set
+*****************************************************************************/
 void Turing::parseInstructions (string filename) {
    ifstream infile(filename.c_str());
    string tape_state, current_state, read_value, write_value, next_state, direction;
@@ -77,7 +83,6 @@ void Turing::parseInstructions (string filename) {
       tape_index = 0;
    }
    
-
    while (infile >> current_state >> read_value >> write_value >> next_state >> direction)
    {
       write_value = write_value.substr(2, write_value.length() - 5);
@@ -92,6 +97,10 @@ void Turing::parseInstructions (string filename) {
    }
 }
 
+
+/*****************************************************************************
+* run the instruction set!
+*****************************************************************************/
 void Turing::runSimulation () {
    while (_state != "halt") {
       printTapeValues();
@@ -103,7 +112,11 @@ void Turing::runSimulation () {
               << "'" << endl;
          break;
       }
-      // cerr << _state + "(" + read_value + ")" << "::" << instruction.write_value << instruction.direction << instruction.next_state << endl;
+      cout << _state + "(" + read_value + ")" 
+           << " :: write(" << instruction.write_value 
+           <<  "), move(" << instruction.direction 
+           << "), changeToState("
+           << instruction.next_state << ")\n\n";
       
       tape[tape_index] = instruction.write_value;
       _state = instruction.next_state;
